@@ -39,7 +39,7 @@ Download and preprocess datasets in `data/`:
 2. [ScienceQA](http://scienceqa.github.io)
 3. [LLaVA-W](https://huggingface.co/datasets/liuhaotian/llava-bench-in-the-wild)
 
-After datasets are downloaded, update the path in run.py
+After all datasets are downloaded, update the path in run.py
 
 ### Inference
 ```
