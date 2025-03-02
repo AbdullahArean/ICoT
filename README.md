@@ -31,7 +31,7 @@ Download and preprocess datasets in `data/`.
 
 ### Code Modification
 
-Replace processo.py and modeling_chameleon.py in this repo with the default ones.
+Replace processing_chameleon.py and modeling_chameleon.py in this repo with the default ones.
 
 ### Inference
 After the dataset is downloaded, update the path in run.py
