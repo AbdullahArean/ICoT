@@ -15,7 +15,7 @@ Our approach enhances multi-modal understanding by interleaving visual and textu
 ![示例图片](figs/icot.png)
 
 
-- **Generalizable Architecture:** Applicable to different multi-modal VLMs.
+- **Generalizable Architecture:** Plug-and-play and applicable to different VLMs.
   
 ![示例图片](figs/ads.png)
 
