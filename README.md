@@ -23,25 +23,26 @@ Our approach enhances multi-modal understanding by interleaving visual and textu
 
 ### Setup
 
-```bash
+1. ```bash
 # Clone the repository
 git clone https://github.com/jungao1106/ICoT.git
 cd ICoT
 
 ```
+2. **Replace** path/to/your/environments/transformers/models/chameleon/processing_chameleon.py **with** icot/processing_chameleon.py
+3. **Replace** path/to/your/environments/transformers/models/chameleon/modeling_chameleon.py **with** icot/modeling_chameleon.py
 
 ## 🔥 Usage
 ### Data Preparation
 
-Download and preprocess datasets in `data/`.
+Download and preprocess datasets in `data/`:
+1. [M^3CoT](https://huggingface.co/datasets/LightChen2333/M3CoT)
+2. [ScienceQA](http://scienceqa.github.io)
+3. [LLaVA-W](https://huggingface.co/datasets/liuhaotian/llava-bench-in-the-wild)
 
-### Code Modification
-
-Replace processing_chameleon.py and modeling_chameleon.py in this repo with the default ones.
+After datasets are downloaded, update the path in run.py
 
 ### Inference
-After the dataset is downloaded, update the path in run.py
-
 ```
 bash run.sh
 ```
