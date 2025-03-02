@@ -12,12 +12,12 @@ Our approach enhances multi-modal understanding by interleaving visual and textu
 
 - **Multi-Modal Chain-of-Thought:** Interleaves textual and visual reasoning steps for better multi-modal understanding.
 
-![示例图片](pdfs/icot.pdf)
+![示例图片](figs/icot.png)
 
 
 - **Generalizable Architecture:** Applicable to different multi-modal VLMs.
   
-![示例图片](pdfs/ads.pdf)
+![示例图片](figs/ads.png)
 
 ## 📦 Installation
 
