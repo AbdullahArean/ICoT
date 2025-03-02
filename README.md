@@ -42,6 +42,8 @@ Download and preprocess datasets in `data/`:
 After all datasets are downloaded, update the path in run.py
 
 ### Inference
+
+
 ```
 bash run.sh
 ```
