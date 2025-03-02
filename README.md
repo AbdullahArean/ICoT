@@ -2,90 +2,56 @@
 
 This repository contains the official implementation of **Interleaved-Modal Chain-of-Thought**, accepted at **CVPR 2025**.
 
-## 📝 Paper
-
-**Title:** Interleaved-Modal Chain-of-Thought\
-**Conference:** CVPR 2025\
-**Authors:** [Jun Gao], [Yongqi Li], ...\
-[📄 Paper Link](#) (To be updated)
 
 ## 🖥️ Introduction
 
-Interleaved-Modal Chain-of-Thought (IM-CoT) is a novel reasoning framework that integrates multiple modalities in a structured chain-of-thought manner. Our approach enhances multi-modal understanding by interleaving visual and textual cues, leading to improved performance on various benchmarks.
+Interleaved-modal Chain-of-Thought (ICoT) is a novel reasoning concept for VLMs that integrates both visual and textual information in a structured chain-of-thought manner.
+Our approach enhances multi-modal understanding by interleaving visual and textual cues, leading to improved performance on various benchmarks.
 
 ## 🚀 Features
 
 - **Multi-Modal Chain-of-Thought:** Interleaves textual and visual reasoning steps for better multi-modal understanding.
-- **Generalizable Architecture:** Applicable to different multi-modal tasks including VQA, image captioning, and vision-language reasoning.
-- **State-of-the-Art Performance:** Achieves competitive results on multiple benchmarks.
+- **Generalizable Architecture:** Applicable to different multi-modal VLMs.
 
 ## 📦 Installation
-
-### Requirements
-
-- Python >= 3.8
-- PyTorch >= 1.10
-- CUDA (if using GPU)
-- Other dependencies in `requirements.txt`
 
 ### Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/IM-CoT.git
-cd IM-CoT
+git clone https://github.com/jungao1106/ICoT.git
+cd ICoT
 
-# Install dependencies
-pip install -r requirements.txt
 ```
 
 ## 🔥 Usage
-
 ### Data Preparation
 
-Download and preprocess datasets following the instructions in `data/README.md`.
+Download and preprocess datasets in `data/`.
 
-### Training
+### Code Modification
 
-```bash
-python train.py --config configs/config.yaml
+Replace processo.py and modeling_chameleon.py in this repo with the default ones.
+
+### Inference
+After the dataset is downloaded, update the path in run.py
+
+```
+bash run.sh
 ```
 
-### Evaluation
 
-```bash
-python evaluate.py --checkpoint path/to/checkpoint.pth
-```
-
-## 📊 Results
-
-Our method achieves the following results on key benchmarks:
-
-| Dataset | Accuracy | Improvement |
-| ------- | -------- | ----------- |
-| VQA v2  | XX%      | +X.X%       |
-| NLVR2   | XX%      | +X.X%       |
 
 ## 📜 Citation
 
 If you find our work useful, please consider citing:
 
 ```bibtex
-@inproceedings{yourpaper2025,
-  title={Interleaved-Modal Chain-of-Thought},
-  author={Your Name and Co-author Name and Others},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-  year={2025}
+@article{gao2024interleaved,
+  title={Interleaved-modal chain-of-thought},
+  author={Gao, Jun and Li, Yongqi and Cao, Ziqiang and Li, Wenjie},
+  journal={arXiv preprint arXiv:2411.19488},
+  year={2024}
 }
 ```
-
-## 🤝 Acknowledgements
-
-This research was supported by [Funding Source]. We also thank [Collaborators] for valuable discussions.
-
----
-
-For any questions or issues, please open an issue or contact us via email.
-
-📌 **GitHub Repository:** [https://github.com/yourusername/IM-CoT](https://github.com/yourusername/IM-CoT)
 
