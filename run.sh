@@ -13,7 +13,7 @@ for i in "${!configs[@]}"; do
 
     echo "Running main.py with $config on GPU $gpu_id..."
 
-    CUDA_VISIBLE_DEVICES=$gpu_id nohup python ./main_m3cot_chameleon_release.py --config $config > "$log_file" 2>&1 &
+    CUDA_VISIBLE_DEVICES=$gpu_id nohup python ./run.py --config $config > "$log_file" 2>&1 &
 
 done
 
