@@ -25,11 +25,12 @@ Our approach enhances multi-modal understanding by interleaving visual and textu
 
  ```bash
 # Clone the repository
+
 git clone https://github.com/jungao1106/ICoT.git
 cd ICoT
 mv icot/processing_chameleon.py path/to/your/environments/transformers/models/chameleon/
 mv icot/modeling_chameleon.py path/to/your/environments/transformers/models/chameleon/
-
+ ```
 
 ## 🔥 Usage
 ### Data Preparation
