@@ -338,7 +338,7 @@ def calculate_generated_text(prompt, vision_x, return_image_masks=False):
             sub_image_masks= torch.cat([torch.ones(1, 1024).bool().to(device='cuda'), sub_image_masks], dim=0).to(device='cuda')
         inputs['sub_image_masks'] = sub_image_masks
       
-    inputs['output_attentions'] = False
+    inputs['output_attentions'] = MCOT
     
     out = model.generate(**inputs,  **generation_config)
     
