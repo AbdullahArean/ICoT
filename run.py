@@ -1,19 +1,25 @@
-
 import os
 import argparse
 from ruamel.yaml import YAML
 parser = argparse.ArgumentParser()
-parser.add_argument('--config', default='./config/config.yaml', help='global environment configs')
+parser.add_argument('--config', default='/data1/gj/MMCOT_reproduce/config/mcot_zero_one.yaml', help='global environment configs')
 args = parser.parse_args()
 yaml = YAML()
 
 # Reading a YAML file
 with open(args.config, 'r') as file:
     config = yaml.load(file)
+    print(config)
     
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+
+if os.environ.get('CUDA_VISIBLE_DEVICES', -1) == -1:
+    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
 import torch
 import json
 import copy
+import random
 from typing import Optional, Tuple, Union, Dict, Any
 from dataclasses import dataclass
 from PIL import Image
@@ -23,6 +29,10 @@ from transformers import ChameleonForConditionalGeneration, ChameleonProcessor
 from transformers.cache_utils import Cache, StaticCache
 from transformers.utils import add_start_docstrings_to_model_forward, replace_return_docstrings, ModelOutput
 from transformers.modeling_outputs import CausalLMOutputWithPast
+
+IMG_FOLDER = './data/m3cot/images/'
+EVAL_FILE = './data/m3cot/test.jsonl'
+DATA_NAME = 'm3cot'
 
 
 @dataclass
@@ -54,7 +64,7 @@ class ChameleonForInterCoT(ChameleonForConditionalGeneration):
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-
+        # inilize for kv cot
         if output_attentions and past_key_values.key_cache == [] and pixel_values is not None:
             self.new_tokens = 0
             self.num_selected_patches = num_selected_patches
@@ -279,23 +289,43 @@ TRAING_CASE_1 = {'id': 'physical-commonsense-1426',
  'domain': 'commonsense',
  'topic': 'physical-commonsense'}
 
-dataset = open('./data/m3cot/test.jsonl').readlines()
+
+dataset = open(EVAL_FILE).readlines()
 dataset = [json.loads(d) for d in dataset]
+dataset = [x for x in dataset if x['image'] is not None ]
 
 model_path = './models/chameleon-7b'
 processor = ChameleonProcessor.from_pretrained(model_path)
 model = ChameleonForInterCoT.from_pretrained(model_path, attn_implementation=config['attn']).to(device='cuda', dtype=torch.bfloat16)
-  
+
 generation_config = {
-        'do_sample': False,
-        'num_beams': 1,
-        'repetition_penalty': 1,
-        'max_new_tokens': 512,
-        'top_p': 0       
+    'do_sample': True,
+    'temperature': 0.7,
+    'top_p': 0.9,
+    'repetition_penalty': 1.2,
+    'min_new_tokens': 32,
+    'max_new_tokens': 512
 }
 
 
-def calculate_generated_text(prompt, vision_x, return_image_masks=False):   
+def calculate_generated_text(prompt, vision_x, return_image_masks=False):
+    """
+    Calculate generated text given a prompt and vision data.
+
+    Parameters:
+    - prompt (str): The input prompt.
+    - vision_x (list[PIL Images]): List of PIL Images containing vision data.
+
+    Returns:
+    Tuple[str, str]: Tuple containing the raw and salt answer text.
+    """
+
+    """
+    Example Prompt:
+    In zero-shot: "<image> <Question> <Options> Answer: "
+    In few-shot: "<image> <Question> <Options> Answer: <Answer> <image> <Question> <Options> Answer: "
+    """
+    
     inputs, sub_image_masks = processor(text = prompt, images=vision_x, padding=True, return_tensors="pt", return_for_text_completion=False, return_image_masks=True)
 
     inputs = inputs.to(device='cuda', dtype=torch.bfloat16)
@@ -308,7 +338,7 @@ def calculate_generated_text(prompt, vision_x, return_image_masks=False):
             sub_image_masks= torch.cat([torch.ones(1, 1024).bool().to(device='cuda'), sub_image_masks], dim=0).to(device='cuda')
         inputs['sub_image_masks'] = sub_image_masks
       
-    inputs['output_attentions'] = MCOT
+    inputs['output_attentions'] = False
     
     out = model.generate(**inputs,  **generation_config)
     
@@ -317,8 +347,6 @@ def calculate_generated_text(prompt, vision_x, return_image_masks=False):
     generated_text = processor.decode(out, skip_special_tokens=True)
     
     return generated_text
-
-
 
 zero_shot_prompt_template = '''<image>Question: {}
 Options:
@@ -330,40 +358,44 @@ A. {}
 B. {}
 C. {}
 D. {}
-Let's think step by step.
-<image11-21-0-11>First, the image shows large ovens in a kitchen area that indicates it is a kitchen of a restaurant. Therefore, option A is correct.
-<image4-10-23-29>Second, there are grease stains on the front of appliances which are indicative of not being cleaned in a while. So option B is correct answer.
-<image21-32-1-9>Third, cabinet doors are opened up throughout the kitchen which shows someone was searching for something. So option C is incorrect. Therefore, we can infer that option A, B and C are all correct.
+<image11-21-0-11>First, the image shows large ovens in a kitchen area that indicates it is a kitchen of a restaurant. Therefore, option A is correct. <image4-10-23-29>Second, there are grease stains on the front of appliances which are indicative of not being cleaned in a while. So option B is correct answer. <image21-32-1-9>Third, cabinet doors are opened up throughout the kitchen which shows someone was searching for something. So option C is incorrect. Therefore, we can infer that option A, B and C are all correct.
 Answer: {}'''.format(TRAING_CASE_1['question'], *TRAING_CASE_1['choices'], TRAING_CASE_1['answer'])
 
-## Tips: We use <image[x]-[y]-[z]-[h]> to represent a sub image to indicate the position of sub image in the original one (patches within x-row to y-row and y-column to z-column).
 
-if __name__ == '__main__':
-    if MCOT:
-        one_shot_mcot_res = []
-        zero_shot_mcot_res = []
-        for data in tqdm(dataset):
-            mcot_input_str = zero_shot_prompt_template.format(data['question'])
-            for i, c in zip(['A', 'B', 'C', 'D', 'E', 'F'], data['choices']):
-                mcot_input_str += '{}. {}\n'.format(i, c)
-            mcot_input_str += '''Let's think step by step.\n'''
-
-            one_shot_vision = [Image.open(os.path.join('./data/m3cot/images', TRAING_CASE_1['id']+'.png')),
-                        Image.open(os.path.join('./data/m3cot/images', TRAING_CASE_1['id']+'.png')),
-                        Image.open(os.path.join('./data/m3cot/images', data['id']+'.png'))]
-            
-
-            one_shot_mcot_input_str = mcot_induct+'\n'+mcot_input_str
-
-            one_shot = calculate_generated_text(one_shot_mcot_input_str, one_shot_vision, return_image_masks= not ZERO_SHOT)
-
-            
-            oneshot_mcot_output = copy.deepcopy(data)
-            oneshot_mcot_output['pred'] = one_shot
-            one_shot_mcot_res.append(oneshot_mcot_output)
-            
-        json.dump(one_shot_mcot_res, open('./results/m3cot/chameleon_icot_one.json', 'w'))
-
+def main():
     
-    else:
-        pass
+    mcot_one_fh = open('./results/chameleon/{}/chameleon_mcot_one.json'.format(DATA_NAME), 'a')
+    mcot_zero_fh = open('./results/chameleon/{}/chameleon_mcot_zero.json'.format(DATA_NAME), 'a')
+    for data in tqdm(dataset):
+        mcot_input_str = zero_shot_prompt_template.format(data['question'])
+        for i, c in zip(['A', 'B', 'C', 'D', 'E', 'F'], data['choices']):
+            mcot_input_str += '{}. {}\n'.format(i, c)
+
+        one_shot_vision = [Image.open(os.path.join('./data/m3cot/images', TRAING_CASE_1['id']+'.png')),
+                    Image.open(os.path.join('./data/m3cot/images', TRAING_CASE_1['id']+'.png')),
+                    Image.open(os.path.join(IMG_FOLDER, data['id']+'.png' if DATA_NAME == 'm3cot' else data['image'] ))]
+        
+        zero_shot_vision = [Image.open(os.path.join(IMG_FOLDER, data['id']+'.png' if DATA_NAME == 'm3cot' else data['image'] ))]
+        
+
+        one_shot_mcot_input_str = mcot_induct+'\n'+mcot_input_str
+
+        zero_shot_mcot_input_str = mcot_input_str
+
+
+        one_shot = calculate_generated_text(one_shot_mcot_input_str, one_shot_vision, return_image_masks= True)
+        zero_shot = calculate_generated_text(zero_shot_mcot_input_str, zero_shot_vision, return_image_masks= False)
+
+        
+        oneshot_mcot_output = copy.deepcopy(data)
+        oneshot_mcot_output['pred'] = one_shot
+        
+        
+        zeroshot_mcot_output = copy.deepcopy(data)
+        zeroshot_mcot_output['pred'] = zero_shot
+        
+        mcot_one_fh.write(json.dumps(oneshot_mcot_output) + '\n')
+        mcot_zero_fh.write(json.dumps(zeroshot_mcot_output) + '\n')
+        
+if __name__ == '__main__':
+    main()
