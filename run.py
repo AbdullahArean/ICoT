@@ -2,7 +2,7 @@ import os
 import argparse
 from ruamel.yaml import YAML
 parser = argparse.ArgumentParser()
-parser.add_argument('--config', default='/data1/gj/MMCOT_reproduce/config/mcot_zero_one.yaml', help='global environment configs')
+parser.add_argument('--config', default='./config/mcot_zero_one.yaml', help='global environment configs')
 args = parser.parse_args()
 yaml = YAML()
 
