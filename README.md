@@ -30,6 +30,17 @@ git clone https://github.com/jungao1106/ICoT.git
 cd ICoT
 mv icot/processing_chameleon.py path/to/your/environments/transformers/models/chameleon/
 mv icot/modeling_chameleon.py path/to/your/environments/transformers/models/chameleon/
+
+Modify the following code in transformers/generation/utils.py/GenerationMixin/_sample
+ # update generated ids, model inputs, and length for next step
+ input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
+->
+ # update generated ids, model inputs, and length for next step
+ if 'selected_vokens' in outputs and outputs['selected_vokens'] is not None:
+   input_ids = torch.cat([input_ids, outputs['selected_vokens'], next_tokens[:, None]], dim=-1)
+ else:
+   input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
+
  ```
 
 ## 🔥 Usage
