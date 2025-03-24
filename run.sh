@@ -2,9 +2,8 @@
 
 config_dir="./config"
 configs=($(ls $config_dir/*.yaml))
-configs=("$config_dir/base_zero.yaml"  "$config_dir/base_one.yaml")
 
-gpus=(1 2)
+gpus=(0 1 2 3 4 5 6 7)
 echo "Number of gpus: ${#gpus[@]}"
 for i in "${!configs[@]}"; do
     config="${configs[$i]}"
