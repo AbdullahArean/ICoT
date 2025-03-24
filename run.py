@@ -2,7 +2,7 @@ import os
 import argparse
 from ruamel.yaml import YAML
 parser = argparse.ArgumentParser()
-parser.add_argument('--config', default='./config/mcot_zero_one.yaml', help='global environment configs')
+parser.add_argument('--config', default='./config/config.yaml', help='global environment configs')
 args = parser.parse_args()
 yaml = YAML()
 
@@ -269,7 +269,6 @@ class ChameleonForInterCoT(ChameleonForConditionalGeneration):
             return model_kwargs
 
 num_selected_patches = 64
-ZERO_SHOT = config['ZERO_SHOT']
 MCOT = config['MCOT']
 
 
