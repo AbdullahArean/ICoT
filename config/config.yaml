@@ -1,2 +1,13 @@
 attn: 'eager'
 MCOT: True
+max_new_tokens: 16
+min_new_tokens: 2
+temperature: 0.7
+top_p: 0.9
+repetition_penalty: 1.2
+use_8bit: False
+use_4bit: True
+low_cpu_mem_usage: True
+image_size: 256
+gradient_checkpointing: True
+torch_compile: False

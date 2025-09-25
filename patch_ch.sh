@@ -10,7 +10,7 @@ info() { printf "\033[1;34m[INFO]\033[0m %s\n" "$*"; }
 err()  { printf "\033[1;31m[ERROR]\033[0m %s\n" "$*" >&2; }
 
 # ----- CONFIG -----
-BASE_DIR="$HOME/Desktop/ICoT[OptimizedFor16GB]"
+BASE_DIR="$HOME/ICoT"
 CML_SRC1="$BASE_DIR/processing_chameleon.py"
 CML_SRC2="$BASE_DIR/modeling_chameleon.py"
 
